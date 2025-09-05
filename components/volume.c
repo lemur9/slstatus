@@ -183,37 +183,39 @@
 		return bprintf("%d", value);
 	}
 #else
-	#include <sys/soundcard.h>
+  const char *
+  volume(const char *unused)
+  {
+      char mute[8], vol[8];
+      FILE *fp;
+      // static char output[32];
 
-	const char *
-	vol_perc(const char *card)
-	{
-		size_t i;
-		int v, afd, devmask;
-		char *vnames[] = SOUND_DEVICE_NAMES;
+      if (!(fp = popen("pactl get-sink-mute @DEFAULT_SINK@ | awk '{print $2}'", "r"))) {
+          warn("popen 'pactl get-sink-mute':");
+          return NULL;
+      }
+      if (fgets(mute, sizeof(mute), fp) == NULL) {
+          pclose(fp);
+          return NULL;
+      }
+      mute[strcspn(mute, "\n")] = '\0';
+      pclose(fp);
 
-		if ((afd = open(card, O_RDONLY | O_NONBLOCK)) < 0) {
-			warn("open '%s':", card);
-			return NULL;
-		}
+      if (!(fp = popen("pactl get-sink-volume @DEFAULT_SINK@ | grep -oE '[0-9]+%' | head -n1 | tr -d '%'", "r"))) {
+          warn("popen 'pactl get-sink-volume':");
+          return NULL;
+      }
+      if (fgets(vol, sizeof(vol), fp) == NULL) {
+          pclose(fp);
+          return NULL;
+      }
+      vol[strcspn(vol, "\n")] = '\0';
+      pclose(fp);
 
-		if (ioctl(afd, (int)SOUND_MIXER_READ_DEVMASK, &devmask) < 0) {
-			warn("ioctl 'SOUND_MIXER_READ_DEVMASK':");
-			close(afd);
-			return NULL;
-		}
-		for (i = 0; i < LEN(vnames); i++) {
-			if (devmask & (1 << i) && !strcmp("vol", vnames[i])) {
-				if (ioctl(afd, MIXER_READ(i), &v) < 0) {
-					warn("ioctl 'MIXER_READ(%ld)':", i);
-					close(afd);
-					return NULL;
-				}
-			}
-		}
-
-		close(afd);
-
-		return bprintf("%d", v & 0xff);
-	}
+      if (strcmp(mute, "yes") == 0 || strcmp(mute, "是") == 0) {
+          return bprintf(" %s%%", vol);
+      } else {
+          return bprintf(" %s%%", vol);
+      }
+  }
 #endif

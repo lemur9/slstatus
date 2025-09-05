@@ -66,10 +66,14 @@ static const char unknown_str[] = "n/a";
  */
 static const struct arg args[] = {
     // 函数          格式           参数
-    //{ disk_free, "󰋊 %s ", "/" },
+    { disk_free, " 󰋊 %s ", "/" },
     { cpu_perc, "󰻠 %s%% ", NULL },
     { ram_perc, " %s%% ", NULL },
-    { run_command, " %s ", "amixer -c 2 sget Headset | grep 'Mono: Playback' |  awk -F '[][]' '{print $2}'" },
-    { run_command, " %s ", "amixer -c 2 sget Headset | grep 'Mono: Playback' |  awk -F '[][]' '{print $8}'" },
+    { wifi_essid, "󰑩 %s ", "wlan0" },
+    { wifi_perc, " %s%% ", "wlan0" },
+    { volume, "%s ", NULL },
+    //{ run_command, " %s ", "pactl get-sink-volume @DEFAULT_SINK@ | awk '{ print $5 }'" },
+    //{ run_command, "%s ", "pactl get-source-volume @DEFAULT_SOURCE@ | awk '{ print $5 }'" },
+    //{ datetime, " %s", "%Y-%m-%d" },
     { datetime, " %s", "%Y-%m-%d %T" },
 };

@@ -77,7 +77,7 @@ const char *uid(const char *unused);
 const char *username(const char *unused);
 
 /* volume */
-const char *vol_perc(const char *card);
+const char *volume(const char *unused);
 
 /* wifi */
 const char *wifi_essid(const char *interface);
